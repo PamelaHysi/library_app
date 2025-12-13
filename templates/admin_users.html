@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Manage Users</h2>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Books</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for u in users %}
+    <tr>
+        <td>{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role }}</td>
+        <td>{{ u.book_count }}</td>
+        <td>
+            <a href="/admin_edit_user/{{ u.id }}">Edit</a> |
+            <a href="/admin_delete_user/{{ u.id }}">Delete</a> |
+            <form method="POST" action="/admin_reset_password/{{ u.id }}" style="display:inline;">
+                <button type="submit" style="background:none; border:none; color:blue; cursor:pointer;">
+                    Reset Password
+                </button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
