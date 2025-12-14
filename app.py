@@ -242,6 +242,10 @@ def admin_delete_user(user_id):
     if session.get("role") != "admin":
         return "Access denied"
 
+    # Prevent admin from deleting themselves
+    if session.get("user_id") == user_id:
+        return "You cannot delete your own account!"
+    
     db = get_db()
 
     # delete all user's books first to avoid foreign key issues
