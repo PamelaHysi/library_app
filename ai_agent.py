@@ -50,11 +50,11 @@ def answer_query(text, user_id, role):
     
     # Current reading status
     elif "currently reading" in text or "what am i reading" in text:
-     results = db.execute("""
+        results = db.execute("""
         SELECT title FROM books WHERE status='reading'
     """).fetchall()
-     if not results:
-        return "No books are currently being read."
+        if not results:
+            return "No books are currently being read."
         titles = ", ".join([r["title"] for r in results])
         return f"Currently reading: {titles}"
      
@@ -75,7 +75,7 @@ def answer_query(text, user_id, role):
         else:
             titles = ", ".join([r["title"] for r in results])
             answer = f"Completed books: {titles}"
-            
+
     # Default response
     db.close()
     return "Sorry, I don't understand your question."
