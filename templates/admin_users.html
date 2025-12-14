@@ -20,11 +20,7 @@
         <td>
             <a href="/admin_edit_user/{{ u.id }}">Edit</a> |
             <a href="/admin_delete_user/{{ u.id }}">Delete</a> |
-            <form method="POST" action="/admin_reset_password/{{ u.id }}" style="display:inline;">
-                <button type="submit" style="background:none; border:none; color:blue; cursor:pointer;">
-                    Reset Password
-                </button>
-            </form>
+
         </td>
     </tr>
     {% endfor %}
