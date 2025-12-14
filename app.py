@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from ai_agent import answer_query
 
 app = Flask(__name__)
-app.secret_key = "supersecret"   # change later
+app.secret_key = "supersecret"   
 
 # ---------- DATABASE HELPER ----------
 def get_db():
@@ -136,11 +136,15 @@ def ai_query():
     answer = None
     if request.method == "POST":
         query = request.form.get("query", "")
-        answer = answer_query(query)
+        answer = answer_query(
+            query,
+            session.get("user_id"),
+            session.get("role")
+            )
     
     return render_template("ai_query.html", answer=answer)
 
-    # ---------- ADMIN DASHBOARD ----------
+# ---------- ADMIN DASHBOARD ----------
 @app.route("/admin")
 def admin():
     if "user_id" not in session or session.get("role") != "admin":
@@ -192,8 +196,8 @@ def admin_delete_book(book_id):
 
     return redirect(url_for("admin_dashboard"))
 
-    # ---------- ADMIN USER LIST ----------
-@app.route("/admin/users")
+# ---------- ADMIN USER LIST ----------
+@app.route("/adminusers")
 def admin_users():
     if session.get("role") != "admin":
         return "Access denied"

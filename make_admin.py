@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 db = sqlite3.connect("database.db")
 
 email = "admin@test.com"
-password = "1234"   # you can change this
+password = "1234"  
 hashed = generate_password_hash(password)
 
 

@@ -7,8 +7,8 @@
     <input type="email" name="email" value="{{ user.email }}" required>
 
     <select name="role">
-        <option value="user" {% if user.role == "user" %}selected{% endif %}>User</option>
-        <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
+        <option value="user" {% if user.role=="user" %}selected{% endif %}>User</option>
+        <option value="admin" {% if user.role=="admin" %}selected{% endif %}>Admin</option>
     </select>
 
     <button type="submit">Save</button>
