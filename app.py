@@ -197,7 +197,7 @@ def admin_delete_book(book_id):
     return redirect(url_for("admin_dashboard"))
 
 # ---------- ADMIN USER LIST ----------
-@app.route("/adminusers")
+@app.route("/admin/users")
 def admin_users():
     if session.get("role") != "admin":
         return "Access denied"
@@ -237,7 +237,7 @@ def admin_edit_user(user_id):
 
 
 # ---------- ADMIN DELETE USER ----------
-@app.route("/admin_delete_user/<int:user_id>")
+@app.route("/admin_delete_user/<int:user_id>", methods=["POST"])
 def admin_delete_user(user_id):
     if session.get("role") != "admin":
         return "Access denied"
@@ -250,22 +250,6 @@ def admin_delete_user(user_id):
     db.commit()
 
     return redirect(url_for("admin_users"))
-
-
-# ---------- ADMIN RESET PASSWORD ----------
-@app.route("/admin_reset_password/<int:user_id>", methods=["POST"])
-def admin_reset_password(user_id):
-    if session.get("role") != "admin":
-        return "Access denied"
-
-    new_password = generate_password_hash("1234")  # default reset value
-
-    db = get_db()
-    db.execute("UPDATE users SET password=? WHERE id=?", (new_password, user_id))
-    db.commit()
-
-    return redirect(url_for("admin_users"))
-
 
 if __name__ == "__main__":
     app.run(debug=False)
