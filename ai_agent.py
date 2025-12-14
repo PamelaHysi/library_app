@@ -19,7 +19,7 @@ def answer_query(text):
             return f"{result['name']} owns the most books ({result['total']})."
 
     # Most popular genre
-    if "popular genre" in text or "most popular" in text:
+    elif "popular genre" in text or "most popular" in text:
         result = db.execute("""
         SELECT genre, COUNT(*) AS total
         FROM books
@@ -28,5 +28,42 @@ def answer_query(text):
         LIMIT 1
         """).fetchone()
         return f"The most popular genre is {result['genre']}."
+    
+    # Total number of books
+    elif "how many books" in text or "total books" in text:
+        result = db.execute("SELECT COUNT(*) AS total FROM books").fetchone()
+        return f"There are {result['total']} books in the library."
 
+    elif "books per user" in text or "each user" in text:
+        results = db.execute("""
+        SELECT users.name, COUNT(books.id) AS total
+        FROM users
+        LEFT JOIN books ON users.id = books.user_id
+        GROUP BY users.id
+    """).fetchall()
+        answer = "Books per user:\n"
+        for r in results:
+            answer += f"{r['name']}: {r['total']} books\n"
+        return answer
+
+    elif "currently reading" in text or "what am i reading" in text:
+     results = db.execute("""
+        SELECT title FROM books WHERE status='reading'
+    """).fetchall()
+     if not results:
+        return "No books are currently being read."
+        titles = ", ".join([r["title"] for r in results])
+        return f"Currently reading: {titles}"
+
+    elif "completed books" in text:
+        results = db.execute("""
+        SELECT title FROM books WHERE status='completed'
+    """).fetchall()
+        if not results:
+            return "No completed books found."
+        titles = ", ".join([r["title"] for r in results])
+        return f"Completed books: {titles}"
+
+    db.close()
     return "Sorry, I don't understand your question."
+
