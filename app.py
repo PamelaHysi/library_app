@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, flash, render_template, request, redirect, url_for, session
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from ai_agent import answer_query
@@ -28,11 +28,19 @@ def register():
         password = generate_password_hash(request.form["password"])
 
         db = get_db()
-        db.execute("INSERT INTO users (name, email, password, role) VALUES (?,?,?,?)",
-                   (name, email, password, "user"))
-        db.commit()
-        return redirect(url_for("login"))
+        try:
+            db.execute("INSERT INTO users (name, email, password, role) VALUES (?,?,?,?)",
+                       (name, email, password, "user"))
+            db.commit()
+        except: 
+            db.close()   
+            flash("Email already registered", "error")
+            return redirect(url_for("register"))
+        db.close()
 
+        flash("Account created. Please log in.", "success")
+        return redirect(url_for("login"))
+    
     return render_template("register.html")
 
 # ---------- LOGIN ----------
@@ -49,13 +57,52 @@ def login():
         db = get_db()
         user = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         db.close()
-
         if user and check_password_hash(user["password"], password):
             session["user_id"] = user["id"]
             session["role"] = user["role"]
+            flash("Login successful", "success")
             return redirect(url_for("dashboard"))
 
+        if not user:
+            flash("Email not found", "error")
+            return redirect(url_for("login"))
+
+        if not check_password_hash(user["password"], password):
+            flash("Incorrect password", "error")
+            return redirect(url_for("login"))
+
     return render_template("login.html")
+
+# ------- FORGOT PASSWORD -------
+@app.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form["email"]
+
+        db = get_db()
+        user = db.execute(
+            "SELECT * FROM users WHERE email=?",
+            (email,)
+        ).fetchone()
+
+        if not user:
+            flash("Email not found", "error")
+            return redirect(url_for("forgot_password"))
+
+        new_password = generate_password_hash("1234")
+
+        db.execute(
+            "UPDATE users SET password=? WHERE email=?",
+            (new_password, email)
+        )
+        db.commit()
+        db.close()
+
+        flash("Password reset to 1234. Please log in.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("forgot_password.html")
+
 
 # ---------- LOGOUT ----------
 @app.route("/logout")
@@ -71,7 +118,7 @@ def dashboard():
 
     db = get_db()
     books = db.execute("SELECT * FROM books WHERE user_id=?", (session["user_id"],)).fetchall()
-
+    db.close()
     return render_template("dashboard.html", books=books)
 
 # ---------- ADD BOOK ----------
@@ -90,6 +137,7 @@ def add_book():
         db.execute("INSERT INTO books (title, author, genre, status, user_id) VALUES (?,?,?,?,?)",
                    (title, author, genre, status, session["user_id"]))
         db.commit()
+        db.close()
         return redirect(url_for("dashboard"))
 
     return render_template("add_book.html")
@@ -112,7 +160,7 @@ def edit_book(book_id):
                    (title, author, genre, status, book_id))
         db.commit()
         return redirect(url_for("dashboard"))
-
+    db.close()
     return render_template("edit_book.html", book=book)
 
 # ---------- DELETE BOOK ----------
@@ -254,6 +302,19 @@ def admin_delete_user(user_id):
     db.commit()
 
     return redirect(url_for("admin_users"))
+
+# -------Error Handlers -------
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("404.html"), 404
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("403.html"), 403
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template("500.html"), 500
 
 if __name__ == "__main__":
     app.run(debug=False)
