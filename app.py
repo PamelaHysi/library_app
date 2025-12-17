@@ -243,7 +243,7 @@ def admin_delete_book(book_id):
     db.execute("DELETE FROM books WHERE id=?", (book_id,))
     db.commit()
 
-    return redirect(url_for("admin_dashboard"))
+    return redirect(url_for("dashboard"))
 
 # ---------- ADMIN USER LIST ----------
 @app.route("/admin/users")
