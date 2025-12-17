@@ -50,16 +50,24 @@ def answer_query(text, user_id, role):
     
     # Current reading status
     elif "currently reading" in text or "what am i reading" in text:
-        results = db.execute("""
+        if role == "admin":
+            results = db.execute("""
         SELECT title FROM books WHERE status='reading'
     """).fetchall()
+        else:
+            results = db.execute("""
+                SELECT title FROM books
+                WHERE status='reading' AND user_id=?
+            """, (user_id,)).fetchall()
+
         if not results:
             return "No books are currently being read."
-        titles = ", ".join([r["title"] for r in results])
-        return f"Currently reading: {titles}"
-     
+        else:
+            titles = ", ".join([r["title"] for r in results])
+            return f"Currently reading: {titles}"
+
     # Completed books
-    elif "completed books" in text:
+    elif "completed books" in text or "which books are completed" in text:
         if role == "admin":
             results = db.execute("""
             SELECT title FROM books WHERE status='completed'
@@ -74,7 +82,7 @@ def answer_query(text, user_id, role):
             answer = "No completed books found."
         else:
             titles = ", ".join([r["title"] for r in results])
-            answer = f"Completed books: {titles}"
+            return f"Completed books: {titles}"
 
     # Default response
     db.close()

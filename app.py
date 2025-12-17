@@ -202,7 +202,7 @@ def admin():
     users = db.execute("SELECT * FROM users").fetchall()
     books = db.execute("SELECT * FROM books").fetchall()
     db.close()
-    
+
     return render_template("admin_dashboard.html", users=users, books=books)
 
 # ---------- ADMIN EDIT BOOK ----------
@@ -227,7 +227,8 @@ def admin_edit_book(book_id):
         """, (title, author, genre, status, book_id))
         db.commit()
 
-        return redirect(url_for("admin_dashboard"))
+        flash("Book updated successfully", "success")
+        return redirect(url_for("dashboard"))
 
     return render_template("admin_edit_book.html", book=book)
 
@@ -279,7 +280,7 @@ def admin_edit_user(user_id):
         """, (name, email, role, user_id))
         db.commit()
 
-        return redirect(url_for("admin_users"))
+        return redirect(url_for("admin_users", user_id=user_id))
 
     return render_template("admin_edit_user.html", user=user)
 
@@ -301,6 +302,7 @@ def admin_delete_user(user_id):
     db.execute("DELETE FROM users WHERE id=?", (user_id,))
     db.commit()
 
+    flash("User deleted successfully", "success")
     return redirect(url_for("admin_users"))
 
 # -------Error Handlers -------

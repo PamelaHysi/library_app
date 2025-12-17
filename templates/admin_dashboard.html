@@ -2,6 +2,14 @@
 {% block content %}
 <h2>Admin Dashboard</h2>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<p style="color: red;">{{ message }}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
 <h3>All Users</h3>
 <table>
     <tr>
@@ -16,7 +24,11 @@
         <td>{{ user.role }}</td>
         <td>
             <a href="{{ url_for('admin_edit_user', user_id=user.id) }}">Edit</a> |
-            <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="post" style="display:inline;">
+
+        </td>
+        <td>
+            <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="post" style="display:inline;"
+                onsubmit="return confirm('Are you sure you want to delete this user?');">
                 <button type="submit">Delete</button>
             </form>
         </td>

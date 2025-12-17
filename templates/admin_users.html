@@ -2,6 +2,14 @@
 {% block content %}
 <h2>Manage Users</h2>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<p style="color: red;">{{ message }}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
 <table>
     <tr>
         <th>Name</th>
@@ -19,7 +27,6 @@
         <td>{{ u.book_count }}</td>
         <td>
             <a href="/admin_edit_user/{{ u.id }}">Edit</a> |
-            <a href="/admin_delete_user/{{ u.id }}">Delete</a> |
 
         </td>
     </tr>
